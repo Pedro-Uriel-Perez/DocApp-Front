@@ -1,0 +1,99 @@
+<div class="container">
+  <h1>Solicitar Cita Médica</h1>
+
+  <!-- Mensaje de éxito -->
+  <div *ngIf="success" class="alert alert-success">
+    ✅ ¡Cita solicitada exitosamente!
+  </div>
+
+  <!-- Mensaje de error -->
+  <div *ngIf="error" class="alert alert-error">
+    ❌ {{ error }}
+  </div>
+  
+  <form [formGroup]="citaForm" (ngSubmit)="onSubmit()" class="cita-form">
+    
+    <!-- Seleccionar Médico -->
+    <div class="form-group">
+      <label for="medico">Médico *</label>
+      <select id="medico" formControlName="medico_id" class="form-control">
+        <option value="">-- Seleccione un médico --</option>
+        <option *ngFor="let medico of medicos" [value]="medico.id">
+          Dr(a). {{ medico.nombre }} {{ medico.apellido }} - {{ medico.especialidad_nombre }}
+        </option>
+      </select>
+      <div *ngIf="submitted && f['medico_id'].errors" class="error">
+        Debe seleccionar un médico
+      </div>
+    </div>
+
+    <!-- Resto del formulario igual -->
+    <div class="form-group">
+      <label for="fecha">Fecha de la Cita *</label>
+      <input 
+        type="date" 
+        id="fecha" 
+        formControlName="fecha_cita"
+        [min]="getMinDate()"
+        class="form-control">
+      <div *ngIf="submitted && f['fecha_cita'].errors" class="error">
+        Debe seleccionar una fecha
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="hora">Hora *</label>
+      <input 
+        type="time" 
+        id="hora" 
+        formControlName="hora_cita"
+        class="form-control">
+      <div *ngIf="submitted && f['hora_cita'].errors" class="error">
+        Debe seleccionar una hora
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="tipo">Tipo de Consulta *</label>
+      <select id="tipo" formControlName="tipo_consulta" class="form-control">
+        <option value="primera_vez">Primera vez</option>
+        <option value="seguimiento">Seguimiento</option>
+        <option value="urgencia">Urgencia</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="motivo">Motivo de la Consulta * (mínimo 10 caracteres)</label>
+      <textarea 
+        id="motivo" 
+        formControlName="motivo_consulta"
+        rows="4"
+        placeholder="Describa el motivo de su consulta"
+        class="form-control"></textarea>
+      <div *ngIf="submitted && f['motivo_consulta'].errors" class="error">
+        <span *ngIf="f['motivo_consulta'].errors['required']">El motivo es requerido</span>
+        <span *ngIf="f['motivo_consulta'].errors['minlength']">Debe tener al menos 10 caracteres</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="notas">Notas Adicionales (Opcional)</label>
+      <textarea 
+        id="notas" 
+        formControlName="notas_paciente"
+        rows="3"
+        placeholder="Información adicional"
+        class="form-control"></textarea>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary" [disabled]="loading">
+        <span *ngIf="loading">Procesando...</span>
+        <span *ngIf="!loading">Solicitar Cita</span>
+      </button>
+      <button type="button" class="btn btn-secondary" (click)="citaForm.reset({ tipo_consulta: 'primera_vez' })">
+        Limpiar
+      </button>
+    </div>
+  </form>
+</div>
