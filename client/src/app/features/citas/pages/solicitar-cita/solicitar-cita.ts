@@ -2,12 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
+import { RouterLink } from '@angular/router';
 import { CitaService } from '../../../../Core/services/cita.service';
 
 @Component({
   selector: 'app-solicitar-cita',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, HttpClientModule],
+  imports: [CommonModule, ReactiveFormsModule, HttpClientModule, RouterLink],
   templateUrl: './solicitar-cita.html',
   styleUrl: './solicitar-cita.css'
 })
@@ -15,6 +16,9 @@ export class SolicitarCitaComponent implements OnInit {
   citaForm: FormGroup;
   submitted = false;
   medicos: any[] = [];
+  medicosOriginal: any[] = []; // Lista completa
+  especialidades: any[] = [];
+  especialidadSeleccionada: number = 0; // 0 = todas
   loading = false;
   error: string | null = null;
   success = false;
@@ -42,7 +46,9 @@ export class SolicitarCitaComponent implements OnInit {
     this.citaService.obtenerMedicos().subscribe({
       next: (response) => {
         if (response.success) {
+          this.medicosOriginal = response.data;
           this.medicos = response.data;
+          this.extraerEspecialidades();
         }
         this.loading = false;
       },
@@ -52,6 +58,35 @@ export class SolicitarCitaComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  extraerEspecialidades(): void {
+    const especialidadesMap = new Map();
+    this.medicosOriginal.forEach(medico => {
+      if (!especialidadesMap.has(medico.especialidad_id)) {
+        especialidadesMap.set(medico.especialidad_id, {
+          id: medico.especialidad_id,
+          nombre: medico.especialidad_nombre
+        });
+      }
+    });
+    this.especialidades = Array.from(especialidadesMap.values());
+  }
+
+  filtrarPorEspecialidad(event: any): void {
+    const especialidadId = parseInt(event.target.value);
+    this.especialidadSeleccionada = especialidadId;
+
+    if (especialidadId === 0) {
+      this.medicos = this.medicosOriginal;
+    } else {
+      this.medicos = this.medicosOriginal.filter(
+        medico => medico.especialidad_id === especialidadId
+      );
+    }
+
+    // Limpiar selección de médico si el filtro cambia
+    this.citaForm.patchValue({ medico_id: '' });
   }
 
   get f() {

@@ -1,0 +1,128 @@
+<div class="container">
+  <h1>Mis Citas Médicas</h1>
+  <p class="bienvenida">Bienvenido, {{ nombrePaciente }}</p>
+
+  <div *ngIf="loading" class="loading">
+    Cargando citas...
+  </div>
+
+  <div *ngIf="error" class="alert alert-error">
+    {{ error }}
+  </div>
+
+  <div *ngIf="!loading && citas.length === 0" class="empty">
+    No tienes citas programadas
+  </div>
+
+  <div class="citas-grid">
+    <div *ngFor="let cita of citas" class="cita-card">
+      <div class="cita-header">
+        <span class="fecha">
+          {{ cita.fecha_cita | date:'dd/MM/yyyy HH:mm' }}
+        </span>
+        <span class="estado" [ngClass]="getEstadoClass(cita.estado)">
+          {{ cita.estado }}
+        </span>
+      </div>
+      
+      <div class="cita-body">
+        <div class="medico-info">
+          <h3>{{ cita.medico_nombre }}</h3>
+          <p class="especialidad">{{ cita.especialidad }}</p>
+        </div>
+
+        <div class="consulta-info">
+          <p><strong>Tipo de consulta:</strong> {{ cita.tipo_consulta }}</p>
+          <p><strong>Duración:</strong> {{ cita.duracion }} minutos</p>
+          <p><strong>Motivo:</strong> {{ cita.motivo_consulta }}</p>
+          <p *ngIf="cita.notas_paciente"><strong>Notas:</strong> {{ cita.notas_paciente }}</p>
+          <p *ngIf="cita.notas_medico" class="notas-medico">
+            <strong>Notas del médico:</strong> {{ cita.notas_medico }}
+          </p>
+          <p *ngIf="cita.motivo_cancelacion" class="cancelacion-motivo">
+            <strong>Motivo de cancelación:</strong> {{ cita.motivo_cancelacion }}
+          </p>
+        </div>
+
+        <div class="contacto-info" *ngIf="cita.estado === 'confirmada'">
+          <p *ngIf="cita.medico_email"><strong>📧 Email:</strong> {{ cita.medico_email }}</p>
+          <p *ngIf="cita.medico_telefono"><strong>📞 Teléfono:</strong> {{ cita.medico_telefono }}</p>
+        </div>
+      </div>
+
+      <div class="cita-actions" *ngIf="puedeModificar(cita)">
+        <button class="btn btn-warning" (click)="abrirModalReprogramar(cita)">
+          Reprogramar
+        </button>
+        <button class="btn btn-danger" (click)="abrirModalCancelar(cita)">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Cancelar -->
+<div class="modal" *ngIf="mostrarModalCancelar">
+  <div class="modal-overlay" (click)="cerrarModalCancelar()"></div>
+  <div class="modal-content">
+    <h2>Cancelar Cita</h2>
+    <p>¿Está seguro que desea cancelar esta cita?</p>
+    <p class="modal-fecha">{{ citaACancelar?.fecha_cita | date:'dd/MM/yyyy HH:mm' }}</p>
+    <p class="modal-medico">con {{ citaACancelar?.medico_nombre }}</p>
+    
+    <div class="form-group">
+      <label>Motivo de cancelación (opcional):</label>
+      <textarea 
+        [(ngModel)]="motivoCancelacion" 
+        rows="3" 
+        placeholder="Ej: Enfermedad, cambio de planes, etc."
+        class="form-control"></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="cerrarModalCancelar()">
+        No, volver
+      </button>
+      <button class="btn btn-danger" (click)="confirmarCancelar()">
+        Sí, cancelar cita
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Reprogramar -->
+<div class="modal" *ngIf="mostrarModalReprogramar">
+  <div class="modal-overlay" (click)="cerrarModalReprogramar()"></div>
+  <div class="modal-content">
+    <h2>Reprogramar Cita</h2>
+    <p>Seleccione nueva fecha y hora:</p>
+    <p class="modal-medico">con {{ citaAReprogramar?.medico_nombre }}</p>
+    
+    <div class="form-group">
+      <label>Fecha:</label>
+      <input 
+        type="date" 
+        [(ngModel)]="nuevaFecha" 
+        [min]="getMinDate()"
+        class="form-control">
+    </div>
+
+    <div class="form-group">
+      <label>Hora:</label>
+      <input 
+        type="time" 
+        [(ngModel)]="nuevaHora"
+        class="form-control">
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="cerrarModalReprogramar()">
+        Cancelar
+      </button>
+      <button class="btn btn-primary" (click)="confirmarReprogramar()">
+        Confirmar nueva fecha
+      </button>
+    </div>
+  </div>
+</div>

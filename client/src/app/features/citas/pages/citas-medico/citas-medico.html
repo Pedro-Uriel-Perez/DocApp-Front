@@ -1,0 +1,342 @@
+<div class="container">
+    
+  <div class="header">
+    <h1>Mis Citas</h1>
+    <p class="bienvenida">Bienvenido, Dr(a). {{ nombreMedico }}</p>
+    <div class="stats">
+      <div class="stat-card stat-solicitada">
+        <span class="stat-number">{{ contarPorEstado('solicitada') }}</span>
+        <span class="stat-label">Solicitadas</span>
+      </div>
+      <div class="stat-card stat-confirmada">
+        <span class="stat-number">{{ contarPorEstado('confirmada') }}</span>
+        <span class="stat-label">Confirmadas</span>
+      </div>
+      <div class="stat-card stat-completada">
+        <span class="stat-number">{{ contarPorEstado('completada') }}</span>
+        <span class="stat-label">Completadas</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filtros">
+    <label>Filtrar por estado:</label>
+    <select [(ngModel)]="filtroEstado" class="form-control">
+      <option value="todas">Todas las citas</option>
+      <option value="solicitada">Solicitadas</option>
+      <option value="confirmada">Confirmadas</option>
+      <option value="completada">Completadas</option>
+      <option value="cancelada">Canceladas</option>
+    </select>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    Cargando citas...
+  </div>
+
+  <div *ngIf="error" class="alert alert-error">
+    {{ error }}
+  </div>
+
+  <div *ngIf="!loading && citasFiltradas.length === 0" class="empty">
+    No tienes citas {{ filtroEstado !== 'todas' ? 'con estado: ' + filtroEstado : '' }}
+  </div>
+
+  <div class="citas-grid">
+    <div *ngFor="let cita of citasFiltradas" class="cita-card">
+      <div class="cita-header">
+        <div>
+          <span class="fecha">{{ cita.fecha_cita | date:'dd/MM/yyyy HH:mm' }}</span>
+          <span class="duracion">{{ cita.duracion }} min</span>
+        </div>
+        <span class="estado" [ngClass]="getEstadoClass(cita.estado)">
+          {{ cita.estado }}
+        </span>
+      </div>
+      
+      <div class="cita-body">
+        <div class="paciente-info">
+          <h3>{{ cita.paciente_nombre }}</h3>
+          <p><strong>Email:</strong> {{ cita.paciente_email }}</p>
+          <p *ngIf="cita.paciente_telefono"><strong>Teléfono:</strong> {{ cita.paciente_telefono }}</p>
+        </div>
+
+        <div class="consulta-info">
+          <p><strong>Tipo:</strong> {{ cita.tipo_consulta }}</p>
+          <p><strong>Motivo:</strong> {{ cita.motivo_consulta }}</p>
+          <p *ngIf="cita.notas_paciente"><strong>Notas del paciente:</strong> {{ cita.notas_paciente }}</p>
+          <p *ngIf="cita.notas_medico" class="notas-medico">
+            <strong>Mis notas:</strong> {{ cita.notas_medico }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Acciones según estado -->
+      <div class="cita-actions" *ngIf="esFutura(cita.fecha_cita)">
+        <!-- Si está solicitada -->
+        <ng-container *ngIf="cita.estado === 'solicitada'">
+          <button class="btn btn-success" (click)="confirmarCita(cita)">
+            ✓ Confirmar
+          </button>
+          <button class="btn btn-danger" (click)="abrirModalRechazar(cita)">
+            ✗ Rechazar
+          </button>
+        </ng-container>
+
+        <!-- Si está confirmada -->
+        <ng-container *ngIf="cita.estado === 'confirmada'">
+          <button class="btn btn-primary" (click)="abrirModalCompletar(cita)">
+            Marcar como Completada
+          </button>
+        </ng-container>
+      </div>
+
+      <!-- Mensaje si es pasada -->
+      <div class="cita-pasada" *ngIf="!esFutura(cita.fecha_cita) && cita.estado === 'confirmada'">
+        <p>⚠️ Esta cita ya pasó. Puede marcarla como completada.</p>
+        <button class="btn btn-primary btn-small" (click)="abrirModalCompletar(cita)">
+          Marcar Completada
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Completar - AMPLIADO CON HISTORIAL MÉDICO -->
+<div class="modal" *ngIf="mostrarModalCompletar">
+  <div class="modal-overlay" (click)="cerrarModalCompletar()"></div>
+  <div class="modal-content modal-historial">
+    <button class="modal-close" (click)="cerrarModalCompletar()">✕</button>
+    
+    <h2>📋 Completar Consulta</h2>
+    <p class="modal-paciente">Paciente: {{ citaACompletar?.paciente_nombre }}</p>
+    
+    <div class="historial-form">
+      
+      <!-- Sección: Diagnóstico -->
+      <div class="form-section">
+        <h3>🩺 Diagnóstico *</h3>
+        <textarea 
+          [(ngModel)]="diagnostico" 
+          rows="3" 
+          placeholder="Diagnóstico principal..."
+          class="form-control"
+          required></textarea>
+      </div>
+
+      <!-- Sección: Síntomas -->
+      <div class="form-section">
+        <h3>📝 Síntomas</h3>
+        <textarea 
+          [(ngModel)]="sintomas" 
+          rows="3" 
+          placeholder="Síntomas presentados por el paciente..."
+          class="form-control"></textarea>
+      </div>
+
+      <!-- Sección: Signos Vitales -->
+      <div class="form-section">
+        <h3>❤️ Signos Vitales</h3>
+        <div class="signos-grid">
+          <div class="form-group">
+            <label>Presión Arterial</label>
+            <input 
+              type="text" 
+              [(ngModel)]="presionArterial" 
+              placeholder="120/80"
+              class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Temperatura (°C)</label>
+            <input 
+              type="number" 
+              [(ngModel)]="temperatura" 
+              placeholder="36.5"
+              step="0.1"
+              class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Peso (kg)</label>
+            <input 
+              type="number" 
+              [(ngModel)]="peso" 
+              placeholder="70"
+              step="0.1"
+              class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Altura (m)</label>
+            <input 
+              type="number" 
+              [(ngModel)]="altura" 
+              placeholder="1.75"
+              step="0.01"
+              class="form-control">
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección: Exploración Física -->
+      <div class="form-section">
+        <h3>🔍 Exploración Física</h3>
+        <textarea 
+          [(ngModel)]="exploracionFisica" 
+          rows="3" 
+          placeholder="Hallazgos en la exploración física..."
+          class="form-control"></textarea>
+      </div>
+
+      <!-- Sección: Recetas Médicas -->
+      <div class="form-section recetas-section">
+        <h3>💊 Recetas Médicas</h3>
+        
+        <!-- Lista de recetas agregadas -->
+        <div *ngIf="recetas.length > 0" class="recetas-lista">
+          <div *ngFor="let receta of recetas; let i = index" class="receta-item">
+            <div class="receta-info">
+              <strong>{{ receta.medicamento_nombre }}</strong>
+              <span *ngIf="receta.medicamento_generico">({{ receta.medicamento_generico }})</span>
+              <p>{{ receta.dosis }} - {{ receta.frecuencia }} - {{ receta.duracion }}</p>
+            </div>
+            <button class="btn-eliminar" (click)="eliminarReceta(i)">🗑️</button>
+          </div>
+        </div>
+
+        <!-- Formulario para agregar receta -->
+        <div class="agregar-receta">
+          <h4>Agregar Medicamento</h4>
+          <div class="receta-grid">
+            <div class="form-group">
+              <label>Medicamento *</label>
+              <input 
+                type="text" 
+                [(ngModel)]="nuevaReceta.medicamento_nombre" 
+                placeholder="Paracetamol"
+                class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Genérico</label>
+              <input 
+                type="text" 
+                [(ngModel)]="nuevaReceta.medicamento_generico" 
+                placeholder="Acetaminofén"
+                class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Dosis *</label>
+              <input 
+                type="text" 
+                [(ngModel)]="nuevaReceta.dosis" 
+                placeholder="500mg"
+                class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Frecuencia *</label>
+              <input 
+                type="text" 
+                [(ngModel)]="nuevaReceta.frecuencia" 
+                placeholder="Cada 8 horas"
+                class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Duración *</label>
+              <input 
+                type="text" 
+                [(ngModel)]="nuevaReceta.duracion" 
+                placeholder="5 días"
+                class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Vía de Administración</label>
+              <select [(ngModel)]="nuevaReceta.via_administracion" class="form-control">
+                <option value="Oral">Oral</option>
+                <option value="Intravenosa">Intravenosa</option>
+                <option value="Intramuscular">Intramuscular</option>
+                <option value="Tópica">Tópica</option>
+                <option value="Sublingual">Sublingual</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Indicaciones</label>
+            <textarea 
+              [(ngModel)]="nuevaReceta.indicaciones" 
+              rows="2" 
+              placeholder="Tomar después de alimentos..."
+              class="form-control"></textarea>
+          </div>
+          <button class="btn btn-agregar" (click)="agregarReceta()">
+            ➕ Agregar Medicamento
+          </button>
+        </div>
+      </div>
+
+      <!-- Sección: Plan de Tratamiento -->
+      <div class="form-section">
+        <h3>📋 Plan de Tratamiento</h3>
+        <textarea 
+          [(ngModel)]="planTratamiento" 
+          rows="3" 
+          placeholder="Indicaciones generales, reposo, dieta..."
+          class="form-control"></textarea>
+      </div>
+
+      <!-- Sección: Observaciones -->
+      <div class="form-section">
+        <h3>📄 Observaciones</h3>
+        <textarea 
+          [(ngModel)]="observaciones" 
+          rows="3" 
+          placeholder="Notas adicionales..."
+          class="form-control"></textarea>
+      </div>
+
+      <!-- Sección: Fecha de Seguimiento -->
+      <div class="form-section">
+        <h3>📅 Fecha de Seguimiento</h3>
+        <input 
+          type="date" 
+          [(ngModel)]="fechaSeguimiento" 
+          class="form-control">
+      </div>
+
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="cerrarModalCompletar()">
+        Cancelar
+      </button>
+      <button class="btn btn-primary" (click)="confirmarCompletar()">
+        💾 Guardar Historial y Completar Consulta
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Rechazar -->
+<div class="modal" *ngIf="mostrarModalRechazar">
+  <div class="modal-overlay" (click)="cerrarModalRechazar()"></div>
+  <div class="modal-content">
+    <h2>Rechazar Cita</h2>
+    <p>¿Por qué rechaza esta cita?</p>
+    
+    <div class="form-group">
+      <label>Motivo:</label>
+      <textarea 
+        [(ngModel)]="motivoRechazo" 
+        rows="3" 
+        placeholder="Ej: No disponible, conflicto de horario..."
+        class="form-control"></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="cerrarModalRechazar()">
+        Cancelar
+      </button>
+      <button class="btn btn-danger" (click)="confirmarRechazar()">
+        Rechazar Cita
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,4 +1,5 @@
 <div class="container">
+
   <h1>Solicitar Cita Médica</h1>
 
   <!-- Mensaje de éxito -->
@@ -9,6 +10,21 @@
   <!-- Mensaje de error -->
   <div *ngIf="error" class="alert alert-error">
     ❌ {{ error }}
+  </div>
+
+  <!-- Filtro por especialidad -->
+  <div class="filtro-especialidad">
+    <label for="especialidad">Filtrar por especialidad:</label>
+    <select 
+      id="especialidad" 
+      (change)="filtrarPorEspecialidad($event)"
+      [value]="especialidadSeleccionada"
+      class="form-control">
+      <option value="0">Todas las especialidades</option>
+      <option *ngFor="let esp of especialidades" [value]="esp.id">
+        {{ esp.nombre }}
+      </option>
+    </select>
   </div>
   
   <form [formGroup]="citaForm" (ngSubmit)="onSubmit()" class="cita-form">
@@ -27,7 +43,7 @@
       </div>
     </div>
 
-    <!-- Resto del formulario igual -->
+    <!-- Resto del formulario igual... -->
     <div class="form-group">
       <label for="fecha">Fecha de la Cita *</label>
       <input 

@@ -1,0 +1,88 @@
+<div class="container">
+  <h1>🔍 Buscar Medicamentos</h1>
+  <p class="subtitle">Consulta información sobre medicamentos de la base de datos de la FDA</p>
+
+  <div class="search-box">
+    <input
+      type="text"
+      [(ngModel)]="nombreMedicamento"
+      placeholder="Ingresa el nombre del medicamento (ej: Aspirin, Ibuprofen)"
+      class="search-input"
+      (keyup.enter)="buscarMedicamentos()"
+    />
+    <button (click)="buscarMedicamentos()" class="btn-search" [disabled]="loading">
+      <span *ngIf="!loading">🔎 Buscar</span>
+      <span *ngIf="loading">Buscando...</span>
+    </button>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    Consultando base de datos FDA...
+  </div>
+
+  <div *ngIf="medicamentos.length > 0 && !loading" class="resultados">
+    <h2>📋 Resultados ({{ medicamentos.length }})</h2>
+    
+    <div class="medicamentos-grid">
+      <div *ngFor="let med of medicamentos" class="medicamento-card">
+        <div class="card-header">
+          <h3>{{ med.marca }}</h3>
+          <span class="generico">{{ med.generico }}</span>
+        </div>
+        <div class="card-body">
+          <p><strong>Fabricante:</strong> {{ med.fabricante }}</p>
+          <p class="indicaciones">{{ limpiarTexto(med.indicaciones) }}</p>
+        </div>
+        <button class="btn-detalle" (click)="verDetalle(med)">
+          Ver Detalles Completos
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de detalle -->
+<div class="modal" *ngIf="medicamentoSeleccionado">
+  <div class="modal-overlay" (click)="cerrarDetalle()"></div>
+  <div class="modal-content modal-large">
+    <button class="modal-close" (click)="cerrarDetalle()">✕</button>
+    
+    <h2>{{ medicamentoSeleccionado.marca }}</h2>
+    <p class="generico-detalle">{{ medicamentoSeleccionado.generico }}</p>
+    
+    <div class="detalle-section">
+      <h3>🏭 Fabricante</h3>
+      <p>{{ medicamentoSeleccionado.fabricante }}</p>
+    </div>
+
+    <div class="detalle-section">
+      <h3>💊 Indicaciones y Uso</h3>
+      <div [innerHTML]="medicamentoSeleccionado.indicaciones"></div>
+    </div>
+
+    <div class="detalle-section">
+      <h3>📝 Dosificación y Administración</h3>
+      <div [innerHTML]="medicamentoSeleccionado.dosificacion"></div>
+    </div>
+
+    <div class="detalle-section warning">
+      <h3>⚠️ Advertencias</h3>
+      <div [innerHTML]="medicamentoSeleccionado.advertencias"></div>
+    </div>
+
+    <div class="detalle-section adverse">
+      <h3>🩺 Efectos Adversos</h3>
+      <div [innerHTML]="medicamentoSeleccionado.efectos_adversos"></div>
+    </div>
+
+    <p class="disclaimer">
+      ℹ️ Esta información proviene de la base de datos de la FDA (Food and Drug Administration).
+      Siempre consulte a su médico antes de tomar cualquier medicamento.
+    </p>
+  </div>
+</div>
