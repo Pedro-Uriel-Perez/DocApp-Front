@@ -119,19 +119,10 @@
         </div>
       </div>
 
-      <!-- Exploración Física -->
-      <div class="detalle-section" *ngIf="consultaSeleccionada?.exploracion_fisica">
-        <h3>🔍 Exploración Física</h3>
-        <p>{{ consultaSeleccionada?.exploracion_fisica }}</p>
-      </div>
-
       <!-- Recetas Médicas -->
       <div class="detalle-section recetas-section" *ngIf="recetasConsulta.length > 0">
         <div class="recetas-header">
           <h3>💊 Medicamentos Recetados</h3>
-          <button class="btn-imprimir" (click)="imprimirReceta()">
-            🖨️ Imprimir Receta
-          </button>
         </div>
         
         <div class="recetas-detalle">

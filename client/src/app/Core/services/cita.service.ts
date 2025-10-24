@@ -73,4 +73,7 @@ export class CitaService {
       { headers: this.getHeaders() }
     );
   }
+  obtenerHorariosDisponibles(medicoId: number, fecha: string): Observable<any> {
+  return this.http.get(`${this.apiUrl}/horarios-disponibles/${medicoId}/${fecha}`);
+}
 }

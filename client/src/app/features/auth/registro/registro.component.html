@@ -1,0 +1,249 @@
+<div class="registro-container">
+  <div class="registro-card">
+    
+    <!-- Header -->
+    <div class="registro-header">
+      <h1>Registro</h1>
+      <p>Únete a DocApp para gestionar tus citas médicas</p>
+    </div>
+
+    <!-- Mensaje de error -->
+    <div *ngIf="error" class="alert alert-error">
+      ❌ {{ error }}
+    </div>
+
+    <!-- Formulario de Registro -->
+    <form [formGroup]="registroForm" (ngSubmit)="onSubmit()">
+      
+      <!-- Nombre y Apellido -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="nombre">Nombre *</label>
+          <input 
+            type="text" 
+            id="nombre" 
+            formControlName="nombre"
+            placeholder=""
+            class="form-control"
+            [class.is-invalid]="submitted && f['nombre'].errors">
+          <div *ngIf="submitted && f['nombre'].errors" class="error-message">
+            <span *ngIf="f['nombre'].errors['required']">El nombre es requerido</span>
+            <span *ngIf="f['nombre'].errors['minlength']">Mínimo 2 caracteres</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="apellido">Apellido *</label>
+          <input 
+            type="text" 
+            id="apellido" 
+            formControlName="apellido"
+            placeholder=""
+            class="form-control"
+            [class.is-invalid]="submitted && f['apellido'].errors">
+          <div *ngIf="submitted && f['apellido'].errors" class="error-message">
+            <span *ngIf="f['apellido'].errors['required']">El apellido es requerido</span>
+            <span *ngIf="f['apellido'].errors['minlength']">Mínimo 2 caracteres</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="form-group">
+        <label for="email">Email *</label>
+        <input 
+          type="email" 
+          id="email" 
+          formControlName="email"
+          placeholder=""
+          class="form-control"
+          [class.is-invalid]="submitted && f['email'].errors">
+        <div *ngIf="submitted && f['email'].errors" class="error-message">
+          <span *ngIf="f['email'].errors['required']">El email es requerido</span>
+          <span *ngIf="f['email'].errors['email']">Email inválido</span>
+        </div>
+      </div>
+
+      <!-- Teléfono -->
+      <div class="form-group">
+        <label for="telefono">Teléfono (opcional)</label>
+        <input 
+          type="tel" 
+          id="telefono" 
+          formControlName="telefono"
+          placeholder=""
+          maxlength="10"
+          class="form-control"
+          [class.is-invalid]="submitted && f['telefono'].errors">
+        <small class="form-text"></small>
+        <div *ngIf="submitted && f['telefono'].errors" class="error-message">
+          <span *ngIf="f['telefono'].errors['pattern']">Debe ser 10 dígitos</span>
+        </div>
+      </div>
+
+      <!-- Contraseña -->
+      <div class="form-group">
+        <label for="password">Contraseña *</label>
+        <div class="password-input">
+          <input 
+            [type]="mostrarPassword ? 'text' : 'password'" 
+            id="password" 
+            formControlName="password"
+            placeholder="Mínimo 8 caracteres"
+            class="form-control"
+            [class.is-invalid]="submitted && f['password'].errors">
+          <button 
+            type="button" 
+            class="toggle-password"
+            (click)="togglePasswordVisibility('password')">
+            {{ mostrarPassword ? '👁️' : '👁️‍🗨️' }}
+          </button>
+        </div>
+        
+        <!-- Indicadores de fortaleza -->
+        <div *ngIf="f['password'].value" class="password-requirements">
+          <div class="requirement" [class.met]="f['password'].value.length >= 8">
+            <span class="icon">{{ f['password'].value.length >= 8 ? '✅' : '⭕' }}</span>
+            Mínimo 8 caracteres
+          </div>
+          <div class="requirement" [class.met]="f['password'].errors?.['passwordStrength']?.hasUpperCase !== false">
+            <span class="icon">{{ f['password'].errors?.['passwordStrength']?.hasUpperCase !== false ? '✅' : '⭕' }}</span>
+            Una mayúscula
+          </div>
+          <div class="requirement" [class.met]="f['password'].errors?.['passwordStrength']?.hasLowerCase !== false">
+            <span class="icon">{{ f['password'].errors?.['passwordStrength']?.hasLowerCase !== false ? '✅' : '⭕' }}</span>
+            Una minúscula
+          </div>
+          <div class="requirement" [class.met]="f['password'].errors?.['passwordStrength']?.hasNumeric !== false">
+            <span class="icon">{{ f['password'].errors?.['passwordStrength']?.hasNumeric !== false ? '✅' : '⭕' }}</span>
+            Un número
+          </div>
+        </div>
+      </div>
+
+      <!-- Confirmar Contraseña -->
+      <div class="form-group">
+        <label for="confirmPassword">Confirmar Contraseña *</label>
+        <div class="password-input">
+          <input 
+            [type]="mostrarConfirmPassword ? 'text' : 'password'" 
+            id="confirmPassword" 
+            formControlName="confirmPassword"
+            placeholder="Confirma tu contraseña"
+            class="form-control"
+            [class.is-invalid]="submitted && (f['confirmPassword'].errors || registroForm.errors?.['passwordMismatch'])">
+          <button 
+            type="button" 
+            class="toggle-password"
+            (click)="togglePasswordVisibility('confirm')">
+            {{ mostrarConfirmPassword ? '👁️' : '👁️‍🗨️' }}
+          </button>
+        </div>
+        <div *ngIf="submitted && registroForm.errors?.['passwordMismatch']" class="error-message">
+          Las contraseñas no coinciden
+        </div>
+      </div>
+
+      <!-- Botón -->
+      <button 
+        type="submit" 
+        class="btn btn-primary btn-block"
+        [disabled]="loading">
+        <span *ngIf="!loading">Crear Cuenta</span>
+        <span *ngIf="loading">
+          <span class="spinner"></span> Registrando...
+        </span>
+      </button>
+
+      <!-- Link a login -->
+      <div class="login-link">
+        ¿Ya tienes cuenta? 
+        <a routerLink="/auth/login">Inicia sesión aquí</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ✅ MODAL DE VERIFICACIÓN -->
+<div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    
+    <!-- Header del modal -->
+    <div class="modal-header">
+      <div class="icon-email">📧</div>
+      <h2>Verifica tu Email</h2>
+      <p>Hemos enviado un código de 6 dígitos a:</p>
+      <p class="email-highlight">{{ emailRegistrado }}</p>
+    </div>
+
+    <!-- Mensaje de éxito -->
+    <div *ngIf="successVerificacion" class="alert alert-success">
+      ✅ ¡Email verificado! Redirigiendo...
+      <div class="success-animation">
+        <div class="checkmark">✓</div>
+      </div>
+    </div>
+
+    <!-- Mensaje de error -->
+    <div *ngIf="errorVerificacion" class="alert alert-error">
+      ❌ {{ errorVerificacion }}
+    </div>
+
+    <!-- Formulario de verificación -->
+    <form [formGroup]="verificarForm" (ngSubmit)="verificarCodigo()" *ngIf="!successVerificacion">
+      
+      <div class="form-group">
+        <label for="codigo">Código de Verificación</label>
+        <input 
+          type="text" 
+          id="codigo" 
+          formControlName="codigo"
+          placeholder="000000"
+          maxlength="6"
+          (input)="onCodigoInput($event)"
+          class="form-control codigo-input"
+          autocomplete="off">
+      </div>
+
+      <button 
+        type="submit" 
+        class="btn btn-primary btn-block"
+        [disabled]="verificando || verificarForm.invalid">
+        <span *ngIf="!verificando">Verificar Código</span>
+        <span *ngIf="verificando">
+          <span class="spinner"></span> Verificando...
+        </span>
+      </button>
+    </form>
+
+    <!-- Opciones adicionales -->
+    <div class="modal-footer" *ngIf="!successVerificacion">
+      <p class="help-text">¿No recibiste el código?</p>
+      <button 
+        type="button"
+        class="btn-link"
+        [disabled]="!canResend || reenviando"
+        (click)="reenviarCodigo()">
+        <span *ngIf="!reenviando && canResend">Reenviar código</span>
+        <span *ngIf="reenviando">
+          <span class="spinner-small"></span> Reenviando...
+        </span>
+        <span *ngIf="!canResend && !reenviando">
+          Reenviar en {{ countdown }}s
+        </span>
+      </button>
+
+      <div class="help-tips">
+      </div>
+    </div>
+
+    <!-- Botón cerrar -->
+    <button 
+      type="button" 
+      class="btn-close" 
+      (click)="cerrarModal()"
+      *ngIf="!successVerificacion">
+      ✕
+    </button>
+  </div>
+</div>

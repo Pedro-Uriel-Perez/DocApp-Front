@@ -17,6 +17,27 @@ interface LoginResponse {
   token?: string;
   user?: Usuario;
   error?: string;
+  requiereVerificacion?: boolean;
+  email?: string;
+}
+
+interface RegisterResponse {
+  success: boolean;
+  message?: string;
+  error?: string;
+  data?: {
+    id: number;
+    email: string;
+    requiereVerificacion: boolean;
+  };
+}
+
+interface VerificarEmailResponse {
+  success: boolean;
+  message?: string;
+  error?: string;
+  token?: string;
+  user?: Usuario;
 }
 
 @Injectable({
@@ -36,6 +57,36 @@ export class AuthService {
     if (this.isBrowser) {
       this.cargarUsuarioDesdeLocalStorage();
     }
+  }
+
+  // Registro de usuario
+  register(datos: {
+    nombre: string;
+    apellido: string;
+    email: string;
+    password: string;
+    telefono?: string;
+  }): Observable<RegisterResponse> {
+    return this.http.post<RegisterResponse>(`${this.apiUrl}/register`, datos);
+  }
+
+  // Verificar email con código
+  verificarEmail(email: string, codigo: string): Observable<VerificarEmailResponse> {
+    return this.http.post<VerificarEmailResponse>(`${this.apiUrl}/verificar-email`, {
+      email,
+      codigo
+    }).pipe(
+      tap(response => {
+        if (response.success && response.token && response.user) {
+          this.guardarSesion(response.token, response.user);
+        }
+      })
+    );
+  }
+
+  //Reenviar código de verificación
+  reenviarCodigo(email: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/reenviar-codigo`, { email });
   }
 
   login(email: string, password: string): Observable<LoginResponse> {

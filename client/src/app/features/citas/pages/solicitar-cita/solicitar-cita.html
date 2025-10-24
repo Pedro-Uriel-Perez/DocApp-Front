@@ -43,7 +43,7 @@
       </div>
     </div>
 
-    <!-- Resto del formulario igual... -->
+    <!-- Fecha -->
     <div class="form-group">
       <label for="fecha">Fecha de la Cita *</label>
       <input 
@@ -57,18 +57,62 @@
       </div>
     </div>
 
+    <!-- ✅ HORARIO DISPONIBLE - NUEVO -->
     <div class="form-group">
-      <label for="hora">Hora *</label>
-      <input 
-        type="time" 
-        id="hora" 
+      <label for="hora_cita">Horario Disponible *</label>
+      
+      <!-- Mensaje cuando está cargando -->
+      <div *ngIf="cargandoHorarios" class="text-muted" style="padding: 10px; color: #666;">
+        <i class="fas fa-spinner fa-spin"></i> Cargando horarios disponibles...
+      </div>
+      
+      <!-- Dropdown de horarios -->
+      <select 
+        *ngIf="!cargandoHorarios"
+        id="hora_cita"
         formControlName="hora_cita"
-        class="form-control">
+        class="form-control"
+        [disabled]="!citaForm.get('medico_id')?.value || !citaForm.get('fecha_cita')?.value || horariosDisponibles.length === 0">
+        
+        <!-- Opción por defecto dinámica -->
+        <option value="">
+          {{ 
+            horariosDisponibles.length > 0 
+              ? 'Seleccione un horario' 
+              : (citaForm.get('fecha_cita')?.value 
+                  ? 'No hay horarios disponibles para esta fecha' 
+                  : 'Primero seleccione médico y fecha')
+          }}
+        </option>
+        
+        <!-- Lista de horarios disponibles -->
+        <option *ngFor="let slot of horariosDisponibles" [value]="slot.hora">
+          {{ slot.label }}
+        </option>
+      </select>
+      
+      <!-- Mensajes de ayuda -->
+      <small 
+        class="form-text text-muted" 
+        style="display: block; margin-top: 5px; font-size: 0.875rem; color: #6c757d;"
+        *ngIf="!citaForm.get('medico_id')?.value || !citaForm.get('fecha_cita')?.value">
+        💡 Seleccione primero un médico y una fecha
+      </small>
+      
+      <small 
+        class="form-text text-muted" 
+        style="display: block; margin-top: 5px; font-size: 0.875rem; color: #dc3545;"
+        *ngIf="horariosDisponibles.length === 0 && citaForm.get('fecha_cita')?.value && !cargandoHorarios">
+        ⚠️ El médico no tiene horarios disponibles para esta fecha. Intente con otra fecha.
+      </small>
+      
+      <!-- Error de validación -->
       <div *ngIf="submitted && f['hora_cita'].errors" class="error">
-        Debe seleccionar una hora
+        Debe seleccionar un horario
       </div>
     </div>
 
+    <!-- Tipo de Consulta -->
     <div class="form-group">
       <label for="tipo">Tipo de Consulta *</label>
       <select id="tipo" formControlName="tipo_consulta" class="form-control">
@@ -78,6 +122,7 @@
       </select>
     </div>
 
+    <!-- Motivo -->
     <div class="form-group">
       <label for="motivo">Motivo de la Consulta * (mínimo 10 caracteres)</label>
       <textarea 
@@ -92,6 +137,7 @@
       </div>
     </div>
 
+    <!-- Notas Adicionales -->
     <div class="form-group">
       <label for="notas">Notas Adicionales (Opcional)</label>
       <textarea 
@@ -102,6 +148,7 @@
         class="form-control"></textarea>
     </div>
 
+    <!-- Botones -->
     <div class="form-actions">
       <button type="submit" class="btn btn-primary" [disabled]="loading">
         <span *ngIf="loading">Procesando...</span>
