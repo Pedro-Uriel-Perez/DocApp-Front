@@ -103,7 +103,11 @@
   </div>
 </div>
 
-<!-- Modal Completar - AMPLIADO CON HISTORIAL MÉDICO -->
+
+
+<!-- ========================================== -->
+<!-- MODAL COMPLETAR CONSULTA (ADAPTATIVO)      -->
+<!-- ========================================== -->
 <div class="modal" *ngIf="mostrarModalCompletar">
   <div class="modal-overlay" (click)="cerrarModalCompletar()"></div>
   <div class="modal-content modal-historial">
@@ -114,84 +118,55 @@
     
     <div class="historial-form">
       
-      <!-- Sección: Diagnóstico -->
+      <!-- Diagnóstico -->
       <div class="form-section">
         <h3>🩺 Diagnóstico *</h3>
-        <textarea 
-          [(ngModel)]="diagnostico" 
-          rows="3" 
-          placeholder="Diagnóstico principal..."
-          class="form-control"
-          required></textarea>
+        <textarea [(ngModel)]="diagnostico" rows="3" placeholder="Diagnóstico principal..." class="form-control" required></textarea>
       </div>
 
-      <!-- Sección: Síntomas -->
+      <!-- Síntomas -->
       <div class="form-section">
         <h3>📝 Síntomas</h3>
-        <textarea 
-          [(ngModel)]="sintomas" 
-          rows="3" 
-          placeholder="Síntomas presentados por el paciente..."
-          class="form-control"></textarea>
+        <textarea [(ngModel)]="sintomas" rows="3" placeholder="Síntomas presentados..." class="form-control"></textarea>
       </div>
 
-      <!-- Sección: Signos Vitales -->
+      <!-- Signos Vitales (Igual) -->
       <div class="form-section">
         <h3>❤️ Signos Vitales</h3>
         <div class="signos-grid">
           <div class="form-group">
             <label>Presión Arterial</label>
-            <input 
-              type="text" 
-              [(ngModel)]="presionArterial" 
-              placeholder="120/80"
-              class="form-control">
+            <input type="text" [(ngModel)]="presionArterial" placeholder="120/80" class="form-control">
           </div>
           <div class="form-group">
             <label>Temperatura (°C)</label>
-            <input 
-              type="number" 
-              [(ngModel)]="temperatura" 
-              placeholder="36.5"
-              step="0.1"
-              class="form-control">
+            <input type="number" [(ngModel)]="temperatura" placeholder="36.5" step="0.1" class="form-control">
           </div>
           <div class="form-group">
             <label>Peso (kg)</label>
-            <input 
-              type="number" 
-              [(ngModel)]="peso" 
-              placeholder="70"
-              step="0.1"
-              class="form-control">
+            <input type="number" [(ngModel)]="peso" placeholder="70" step="0.1" class="form-control">
           </div>
           <div class="form-group">
             <label>Altura (m)</label>
-            <input 
-              type="number" 
-              [(ngModel)]="altura" 
-              placeholder="1.75"
-              step="0.01"
-              class="form-control">
+            <input type="number" [(ngModel)]="altura" placeholder="1.75" step="0.01" class="form-control">
           </div>
         </div>
       </div>
 
-      <!-- Sección: Exploración Física -->
+      <!-- Exploración Física -->
       <div class="form-section">
         <h3>🔍 Exploración Física</h3>
-        <textarea 
-          [(ngModel)]="exploracionFisica" 
-          rows="3" 
-          placeholder="Hallazgos en la exploración física..."
-          class="form-control"></textarea>
+        <textarea [(ngModel)]="exploracionFisica" rows="3" placeholder="Hallazgos..." class="form-control"></textarea>
       </div>
 
-      <!-- Sección: Recetas Médicas -->
+      <!-- ====================================================== -->
+      <!-- SECCIÓN DINÁMICA: RECETAS vs PLAN NUTRICIONAL          -->
+      <!-- ====================================================== -->
       <div class="form-section recetas-section">
-        <h3>💊 Recetas Médicas</h3>
+        <!-- Título Cambiante -->
+        <h3>{{ tituloSeccionItems }}</h3>
         
-        <!-- Lista de recetas agregadas -->
+        <!-- Lista de items agregados -->
         <div *ngIf="recetas.length > 0" class="recetas-lista">
           <div *ngFor="let receta of recetas; let i = index" class="receta-item">
             <div class="receta-info">
@@ -203,51 +178,45 @@
           </div>
         </div>
 
-        <!-- Formulario para agregar receta -->
+        <!-- Formulario para agregar -->
         <div class="agregar-receta">
-          <h4>Agregar Medicamento</h4>
+          <h4>{{ lblAgregarBtn }}</h4>
           <div class="receta-grid">
+            
             <div class="form-group">
-              <label>Medicamento *</label>
-              <input 
-                type="text" 
-                [(ngModel)]="nuevaReceta.medicamento_nombre" 
-                placeholder="Paracetamol"
-                class="form-control">
+              <!-- Label Dinámico -->
+              <label>{{ lblNombreItem }} *</label>
+              <input type="text" [(ngModel)]="nuevaReceta.medicamento_nombre" 
+                     [placeholder]="placeholderNombre" class="form-control">
             </div>
-            <div class="form-group">
+            
+            <!-- Campo Genérico: Solo visible si NO es Nutriólogo -->
+            <div class="form-group" *ngIf="!esNutriologo">
               <label>Genérico</label>
-              <input 
-                type="text" 
-                [(ngModel)]="nuevaReceta.medicamento_generico" 
-                placeholder="Acetaminofén"
-                class="form-control">
+              <input type="text" [(ngModel)]="nuevaReceta.medicamento_generico" 
+                     placeholder="Acetaminofén" class="form-control">
             </div>
+
             <div class="form-group">
-              <label>Dosis *</label>
-              <input 
-                type="text" 
-                [(ngModel)]="nuevaReceta.dosis" 
-                placeholder="500mg"
-                class="form-control">
+              <label>{{ lblDosis }} *</label>
+              <input type="text" [(ngModel)]="nuevaReceta.dosis" 
+                     [placeholder]="placeholderDosis" class="form-control">
             </div>
+
             <div class="form-group">
-              <label>Frecuencia *</label>
-              <input 
-                type="text" 
-                [(ngModel)]="nuevaReceta.frecuencia" 
-                placeholder="Cada 8 horas"
-                class="form-control">
+              <label>{{ lblFrecuencia }} *</label>
+              <input type="text" [(ngModel)]="nuevaReceta.frecuencia" 
+                     [placeholder]="placeholderFrecuencia" class="form-control">
             </div>
+            
             <div class="form-group">
               <label>Duración *</label>
-              <input 
-                type="text" 
-                [(ngModel)]="nuevaReceta.duracion" 
-                placeholder="5 días"
-                class="form-control">
+              <input type="text" [(ngModel)]="nuevaReceta.duracion" 
+                     placeholder="Ej. 5 días / 1 semana" class="form-control">
             </div>
-            <div class="form-group">
+
+            <!-- Vía de Administración: Solo visible si NO es Nutriólogo -->
+            <div class="form-group" *ngIf="!esNutriologo">
               <label>Vía de Administración</label>
               <select [(ngModel)]="nuevaReceta.via_administracion" class="form-control">
                 <option value="Oral">Oral</option>
@@ -258,57 +227,41 @@
               </select>
             </div>
           </div>
+
           <div class="form-group">
-            <label>Indicaciones</label>
-            <textarea 
-              [(ngModel)]="nuevaReceta.indicaciones" 
-              rows="2" 
-              placeholder="Tomar después de alimentos..."
-              class="form-control"></textarea>
+            <label>{{ esNutriologo ? 'Notas / Preparación' : 'Indicaciones' }}</label>
+            <textarea [(ngModel)]="nuevaReceta.indicaciones" rows="2" 
+                      placeholder="..." class="form-control"></textarea>
           </div>
+
           <button class="btn btn-agregar" (click)="agregarReceta()">
-            ➕ Agregar Medicamento
+            ➕ {{ lblAgregarBtn }}
           </button>
         </div>
       </div>
+      <!-- ====================================================== -->
 
-      <!-- Sección: Plan de Tratamiento -->
       <div class="form-section">
         <h3>📋 Plan de Tratamiento</h3>
-        <textarea 
-          [(ngModel)]="planTratamiento" 
-          rows="3" 
-          placeholder="Indicaciones generales, reposo, dieta..."
-          class="form-control"></textarea>
+        <textarea [(ngModel)]="planTratamiento" rows="3" placeholder="Indicaciones generales..." class="form-control"></textarea>
       </div>
 
-      <!-- Sección: Observaciones -->
       <div class="form-section">
         <h3>📄 Observaciones</h3>
-        <textarea 
-          [(ngModel)]="observaciones" 
-          rows="3" 
-          placeholder="Notas adicionales..."
-          class="form-control"></textarea>
+        <textarea [(ngModel)]="observaciones" rows="3" placeholder="Notas adicionales..." class="form-control"></textarea>
       </div>
 
-      <!-- Sección: Fecha de Seguimiento -->
       <div class="form-section">
         <h3>📅 Fecha de Seguimiento</h3>
-        <input 
-          type="date" 
-          [(ngModel)]="fechaSeguimiento" 
-          class="form-control">
+        <input type="date" [(ngModel)]="fechaSeguimiento" class="form-control">
       </div>
 
     </div>
 
     <div class="modal-actions">
-      <button class="btn btn-secondary" (click)="cerrarModalCompletar()">
-        Cancelar
-      </button>
+      <button class="btn btn-secondary" (click)="cerrarModalCompletar()">Cancelar</button>
       <button class="btn btn-primary" (click)="confirmarCompletar()">
-        💾 Guardar Historial y Completar Consulta
+        💾 Guardar {{ esNutriologo ? 'Plan' : 'Historial' }}
       </button>
     </div>
   </div>

@@ -10,6 +10,7 @@ interface Usuario {
   apellido: string;
   email: string;
   rol: 'paciente' | 'medico' | 'admin' | 'ayudante';
+  especialidad: string;
 }
 
 interface LoginResponse {

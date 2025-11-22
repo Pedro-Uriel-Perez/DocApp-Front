@@ -21,6 +21,9 @@ export class CitasMedicoComponent implements OnInit {
   nombreMedico: string = '';
   filtroEstado: string = 'todas';
 
+  // --- NUEVO: Bandera de Especialidad ---
+  esNutriologo: boolean = false;
+
   // Modal completar con historial médico
   mostrarModalCompletar = false;
   citaACompletar: any = null;
@@ -37,7 +40,7 @@ export class CitasMedicoComponent implements OnInit {
   planTratamiento: string = '';
   fechaSeguimiento: string = '';
   
-  // Recetas médicas
+  // Recetas médicas / plan alimenticio
   recetas: any[] = [];
   nuevaReceta = {
     medicamento_nombre: '',
@@ -65,11 +68,50 @@ export class CitasMedicoComponent implements OnInit {
     if (user && user.rol === 'medico') {
       this.medicoId = user.id;
       this.nombreMedico = `${user.nombre} ${user.apellido}`;
+
+       // --- LÓGICA DE DETECCIÓN AUTOMÁTICA ---
+      // Verificamos si en la sesión se guardó la especialidad
+      // OJO: Si tu objeto user no tiene 'especialidad', el backend lo manejará,
+      // pero para que el FRONT cambie los labels, necesitamos saberlo aquí.
+      // Para la DEMO, si no tienes el dato, puedes forzarlo temporalmente así:
+      // this.esNutriologo = false; // <--- DESCOMENTAR SOLO PARA PROBAR VISUALMENTE SI NO TIENES EL DATO
+
+      const especialidad = user.especialidad || ''; // Asegúrate que tu login devuelva esto
+      this.esNutriologo = especialidad.toLowerCase().includes('nutrición');
+
       this.cargarCitas();
     } else {
       this.error = 'Debe iniciar sesión como médico';
     }
   }
+
+
+   // --- GETTERS DINÁMICOS (La Magia del Frontend) ---
+  get tituloSeccionItems(): string {
+    return this.esNutriologo ? '🥗 Plan Alimenticio' : '💊 Recetas Médicas';
+  }
+  get lblAgregarBtn(): string {
+    return this.esNutriologo ? 'Agregar Alimento' : 'Agregar Medicamento';
+  }
+  get lblNombreItem(): string {
+    return this.esNutriologo ? 'Alimento / Platillo' : 'Medicamento';
+  }
+  get placeholderNombre(): string {
+    return this.esNutriologo ? 'Ej. Pechuga de Pollo' : 'Ej. Paracetamol';
+  }
+  get lblDosis(): string {
+    return this.esNutriologo ? 'Porción' : 'Dosis';
+  }
+  get placeholderDosis(): string {
+    return this.esNutriologo ? 'Ej. 150g / 1 taza' : 'Ej. 500mg';
+  }
+  get lblFrecuencia(): string {
+    return this.esNutriologo ? 'Horario' : 'Frecuencia';
+  }
+  get placeholderFrecuencia(): string {
+    return this.esNutriologo ? 'Ej. Desayuno' : 'Ej. Cada 8 horas';
+  }
+  // ------------------------------------------------
 
   cargarCitas(): void {
     this.loading = true;
@@ -138,6 +180,7 @@ export class CitasMedicoComponent implements OnInit {
   }
 
   limpiarFormulario(): void {
+    // Nota: No reseteamos 'esNutriologo' aquí porque eso depende del usuario, no del formulario
     this.diagnostico = '';
     this.sintomas = '';
     this.exploracionFisica = '';
