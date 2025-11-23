@@ -20,7 +20,7 @@ export class SolicitarCitaComponent implements OnInit {
   especialidades: any[] = [];
   especialidadSeleccionada: number = 0;
   
-  // ✅ NUEVO: Para horarios dinámicos
+  // Para horarios dinámicos
   horariosDisponibles: any[] = [];
   cargandoHorarios = false;
   
@@ -47,7 +47,7 @@ export class SolicitarCitaComponent implements OnInit {
     this.configurarListeners();
   }
 
-  // ✅ NUEVO: Escuchar cambios en médico y fecha
+  //Escuchar cambios en médico y fecha
   configurarListeners(): void {
     // Cuando cambia el médico, resetear fecha y horarios
     this.citaForm.get('medico_id')?.valueChanges.subscribe(() => {
@@ -117,7 +117,7 @@ export class SolicitarCitaComponent implements OnInit {
     this.horariosDisponibles = [];
   }
 
-  // ✅ NUEVO: Cargar horarios disponibles
+  // Cargar horarios disponibles
   cargarHorariosDisponibles(): void {
     const medicoId = this.citaForm.get('medico_id')?.value;
     const fecha = this.citaForm.get('fecha_cita')?.value;
@@ -175,7 +175,7 @@ export class SolicitarCitaComponent implements OnInit {
     this.loading = true;
     const formData = this.citaForm.value;
     
-    // ✅ Combinar fecha y hora correctamente
+    // Combinar fecha y hora correctamente
     const fechaHora = `${formData.fecha_cita}T${formData.hora_cita}:00`;
     
     const cita = {

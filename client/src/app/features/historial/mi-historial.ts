@@ -102,4 +102,18 @@ export class MiHistorialComponent implements OnInit {
   imprimirReceta(): void {
     window.print();
   }
+
+getTituloRecetas(): string {
+  if (this.recetasConsulta && this.recetasConsulta.length > 0) {
+    const primerItem = this.recetasConsulta[0];
+    
+    // Usar directamente el tipo_item de la base de datos
+    if (primerItem.tipo_item === 'alimento') {
+      return '🥗 Plan Alimenticio';
+    }
+  }
+  
+  return '💊 Medicamentos Recetados';
 }
+}
+
