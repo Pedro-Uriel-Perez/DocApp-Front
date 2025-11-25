@@ -191,9 +191,9 @@
             </div>
             
             <!-- Campo Genérico: Solo visible si NO es Nutriólogo -->
-            <div class="form-group" *ngIf="!esNutriologo">
+            <div class="form-group" *ngIf="mostrarGenerico">
               <label>Genérico</label>
-              <input type="text" [(ngModel)]="nuevaReceta.medicamento_generico" 
+              <input type="text" [(ngModel)]="nuevaReceta.medicamento_generico"
                      placeholder="Acetaminofén" class="form-control">
             </div>
 
@@ -210,13 +210,13 @@
             </div>
             
             <div class="form-group">
-              <label>Duración *</label>
-              <input type="text" [(ngModel)]="nuevaReceta.duracion" 
-                     placeholder="Ej. 5 días / 1 semana" class="form-control">
+              <label>{{ lblDuracion }} *</label>
+              <input type="text" [(ngModel)]="nuevaReceta.duracion"
+                     [placeholder]="placeholderDuracion" class="form-control">
             </div>
 
-            <!-- Vía de Administración: Solo visible si NO es Nutriólogo -->
-            <div class="form-group" *ngIf="!esNutriologo">
+            <!-- Vía de Administración: Solo visible si NO es Nutriólogo ni Odontólogo -->
+            <div class="form-group" *ngIf="mostrarViaAdministracion">
               <label>Vía de Administración</label>
               <select [(ngModel)]="nuevaReceta.via_administracion" class="form-control">
                 <option value="Oral">Oral</option>
@@ -229,8 +229,8 @@
           </div>
 
           <div class="form-group">
-            <label>{{ esNutriologo ? 'Notas / Preparación' : 'Indicaciones' }}</label>
-            <textarea [(ngModel)]="nuevaReceta.indicaciones" rows="2" 
+            <label>{{ lblIndicaciones }}</label>
+            <textarea [(ngModel)]="nuevaReceta.indicaciones" rows="2"
                       placeholder="..." class="form-control"></textarea>
           </div>
 
@@ -261,7 +261,7 @@
     <div class="modal-actions">
       <button class="btn btn-secondary" (click)="cerrarModalCompletar()">Cancelar</button>
       <button class="btn btn-primary" (click)="confirmarCompletar()">
-        💾 Guardar {{ esNutriologo ? 'Plan' : 'Historial' }}
+        💾 Guardar {{ esNutricion() ? 'Plan Nutricional' : esPediatria() ? 'Historial Pediátrico' : 'Historial' }}
       </button>
     </div>
   </div>

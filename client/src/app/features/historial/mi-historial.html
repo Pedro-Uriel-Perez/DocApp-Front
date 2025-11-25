@@ -2,7 +2,9 @@
   <h1>📋 Mi Historial Médico</h1>
   <p class="bienvenida">{{ nombrePaciente }}</p>
 
-  <div *ngIf="loading" class="loading">Cargando historial médico...</div>
+  <div *ngIf="loading" class="loading">
+    Cargando historial médico...
+  </div>
 
   <div *ngIf="error" class="alert alert-error">
     {{ error }}
@@ -22,7 +24,7 @@
         <div class="consulta-card">
           <div class="consulta-header">
             <div class="fecha-badge">
-              {{ historial.fecha_consulta | date : 'dd/MM/yyyy HH:mm' }}
+              {{ historial.fecha_consulta | date:'dd/MM/yyyy HH:mm' }}
             </div>
             <div class="medico-info">
               <strong>{{ historial.medico_nombre }}</strong>
@@ -37,8 +39,12 @@
             </div>
 
             <div class="signos-preview" *ngIf="historial.presion_arterial || historial.temperatura">
-              <span *ngIf="historial.presion_arterial"> ❤️ {{ historial.presion_arterial }} </span>
-              <span *ngIf="historial.temperatura"> 🌡️ {{ historial.temperatura }}°C </span>
+              <span *ngIf="historial.presion_arterial">
+                ❤️ {{ historial.presion_arterial }}
+              </span>
+              <span *ngIf="historial.temperatura">
+                🌡️ {{ historial.temperatura }}°C
+              </span>
               <span *ngIf="historial.peso && historial.altura">
                 ⚖️ IMC: {{ calcularIMC(historial.peso, historial.altura) }}
               </span>
@@ -59,12 +65,10 @@
   <div class="modal-overlay" (click)="cerrarDetalle()"></div>
   <div class="modal-content modal-detalle">
     <button class="modal-close" (click)="cerrarDetalle()">✕</button>
-
+    
     <div class="modal-header-detalle">
       <h2>📋 Consulta Médica</h2>
-      <p class="fecha-consulta">
-        {{ consultaSeleccionada?.fecha_consulta | date : 'EEEE, dd MMMM yyyy HH:mm' }}
-      </p>
+      <p class="fecha-consulta">{{ consultaSeleccionada?.fecha_consulta | date:'EEEE, dd MMMM yyyy HH:mm' }}</p>
       <div class="medico-badge">
         <strong>{{ consultaSeleccionada?.medico_nombre }}</strong>
         <span>{{ consultaSeleccionada?.especialidad }}</span>
@@ -72,35 +76,26 @@
     </div>
 
     <div class="detalle-content">
+      
       <!-- Diagnóstico -->
       <div class="detalle-section diagnostico-section">
-        <h3>🩺 Diagnóstico</h3>
+        <h3>{{ getTituloDiagnostico() }}</h3>
         <p>{{ consultaSeleccionada?.diagnostico }}</p>
       </div>
 
       <!-- Síntomas -->
-      <div
-        class="detalle-section"
-        *ngIf="
-          consultaSeleccionada?.sintomas &&
-          consultaSeleccionada?.sintomas.trim() !== '' &&
-          !consultaSeleccionada?.sintomas.toLowerCase().includes('abstract')
-        "
-      >
-        <h3>📝 Síntomas Presentados</h3>
-        <p>{{ consultaSeleccionada?.sintomas }}</p>
-      </div>
+<div class="detalle-section" 
+     *ngIf="consultaSeleccionada?.sintomas && 
+            consultaSeleccionada?.sintomas.trim() !== '' && 
+            !consultaSeleccionada?.sintomas.toLowerCase().includes('abstract')">
+  <h3>📝 Síntomas Presentados</h3>
+  <p>{{ consultaSeleccionada?.sintomas }}</p>
+</div>
 
       <!-- Signos Vitales -->
-      <div
-        class="detalle-section signos-section"
-        *ngIf="
-          consultaSeleccionada?.presion_arterial ||
-          consultaSeleccionada?.temperatura ||
-          consultaSeleccionada?.peso
-        "
-      >
-        <h3>❤️ Signos Vitales</h3>
+      <div class="detalle-section signos-section"
+           *ngIf="consultaSeleccionada?.presion_arterial || consultaSeleccionada?.temperatura || consultaSeleccionada?.peso">
+        <h3>{{ getTituloSignosVitales() }}</h3>
         <div class="signos-detalle">
           <div class="signo-item" *ngIf="consultaSeleccionada?.presion_arterial">
             <span class="signo-label">Presión Arterial:</span>
@@ -118,108 +113,87 @@
             <span class="signo-label">Altura:</span>
             <span class="signo-valor">{{ consultaSeleccionada.altura }} m</span>
           </div>
-          <div
-            class="signo-item imc"
-            *ngIf="consultaSeleccionada?.peso && consultaSeleccionada?.altura"
-            [ngClass]="getIMCClass(consultaSeleccionada.peso, consultaSeleccionada.altura)"
-          >
+          <div class="signo-item imc" 
+               *ngIf="consultaSeleccionada?.peso && consultaSeleccionada?.altura"
+               [ngClass]="getIMCClass(consultaSeleccionada.peso, consultaSeleccionada.altura)">
             <span class="signo-label">IMC:</span>
-            <span class="signo-valor">{{
-              calcularIMC(consultaSeleccionada.peso, consultaSeleccionada.altura)
-            }}</span>
+            <span class="signo-valor">{{ calcularIMC(consultaSeleccionada.peso, consultaSeleccionada.altura) }}</span>
           </div>
         </div>
       </div>
 
       <!-- Recetas Médicas -->
       <div class="detalle-section recetas-section" *ngIf="recetasConsulta.length > 0">
-        <div class="recetas-header">
-          <h3>{{ getTituloRecetas() }}</h3>
-          ←
-        </div>
+  <div class="recetas-header">
+    <h3>{{ getTituloRecetas() }}</h3>
+  </div>
+        
+      <div class="recetas-detalle">
+  <div *ngFor="let receta of recetasConsulta" class="receta-card">
+    <div class="receta-nombre">
+      <strong>{{ receta.medicamento_nombre }}</strong>
+      <span *ngIf="receta.medicamento_generico && !esNutricion()">({{ receta.medicamento_generico }})</span>
+    </div>
+    <div class="receta-detalles">
 
-        <div class="recetas-detalle">
-          <div *ngFor="let receta of recetasConsulta" class="receta-card">
-            <div class="receta-nombre">
-              <strong>{{ receta.medicamento_nombre }}</strong>
-              <span *ngIf="receta.medicamento_generico">({{ receta.medicamento_generico }})</span>
-            </div>
-            <div class="receta-detalles">
-              <!-- Dosis / Porción -->
-              <div class="receta-info-item">
-                <span class="label">{{
-                  receta.tipo_item === 'alimento' ? 'Porción:' : 'Dosis:'
-                }}</span>
-                <span class="value">{{ receta.dosis }}</span>
-              </div>
-
-              <!-- Frecuencia / Horario -->
-              <div class="receta-info-item">
-                <span class="label">{{
-                  receta.tipo_item === 'alimento' ? 'Horario:' : 'Frecuencia:'
-                }}</span>
-                <span class="value">{{ receta.frecuencia }}</span>
-              </div>
-
-              <!-- Duración / Preparación -->
-              <div class="receta-info-item">
-                <span class="label">{{
-                  receta.tipo_item === 'alimento' ? 'Preparación:' : 'Duración:'
-                }}</span>
-                <span class="value">{{ receta.duracion }}</span>
-              </div>
-
-              <!-- Vía de administración (SOLO para medicamentos) -->
-              <div
-                class="receta-info-item"
-                *ngIf="receta.via_administracion && receta.tipo_item !== 'alimento'"
-              >
-                <span class="label">Vía:</span>
-                <span class="value">{{ receta.via_administracion }}</span>
-              </div>
-            </div>
-
-            <!-- Indicaciones / Calorías -->
-            <div class="receta-indicaciones" *ngIf="receta.indicaciones">
-              <strong>{{ receta.tipo_item === 'alimento' ? 'Notas:' : 'Indicaciones:' }}</strong>
-              {{ receta.indicaciones }}
-            </div>
-          </div>
-        </div>
-        <!-- Plan de Tratamiento -->
-        <div
-          class="detalle-section"
-          *ngIf="
-            consultaSeleccionada?.plan_tratamiento &&
-            consultaSeleccionada?.plan_tratamiento.trim() !== '' &&
-            !consultaSeleccionada?.plan_tratamiento.toLowerCase().includes('abstract')
-          "
-        >
-          <h3>📋 Plan de Tratamiento</h3>
-          <p>{{ consultaSeleccionada?.plan_tratamiento }}</p>
-        </div>
-
-        <!-- Observaciones -->
-        <div
-          class="detalle-section"
-          *ngIf="
-            consultaSeleccionada?.observaciones &&
-            consultaSeleccionada?.observaciones.trim() !== '' &&
-            !consultaSeleccionada?.observaciones.toLowerCase().includes('abstract')
-          "
-        >
-          <h3>📄 Observaciones del Médico</h3>
-          <p>{{ consultaSeleccionada?.observaciones }}</p>
-        </div>
-
-        <!-- Fecha de Seguimiento -->
-        <div class="detalle-section seguimiento" *ngIf="consultaSeleccionada?.fecha_seguimiento">
-          <h3>📅 Próxima Consulta</h3>
-          <p class="fecha-seguimiento">
-            {{ consultaSeleccionada.fecha_seguimiento | date : 'dd/MM/yyyy' }}
-          </p>
-        </div>
+      <!-- Dosis / Porción -->
+      <div class="receta-info-item">
+        <span class="label">{{ getLabelDosis() }}:</span>
+        <span class="value">{{ receta.dosis }}</span>
       </div>
+
+      <!-- Frecuencia / Horario -->
+      <div class="receta-info-item">
+        <span class="label">{{ getLabelFrecuencia() }}:</span>
+        <span class="value">{{ receta.frecuencia }}</span>
+      </div>
+
+      <!-- Duración / Preparación -->
+      <div class="receta-info-item">
+        <span class="label">{{ getLabelDuracion() }}:</span>
+        <span class="value">{{ receta.duracion }}</span>
+      </div>
+
+      <!-- Vía de administración (SOLO para medicamentos) -->
+      <div class="receta-info-item" *ngIf="receta.via_administracion && !esNutricion()">
+        <span class="label">Vía:</span>
+        <span class="value">{{ receta.via_administracion }}</span>
+      </div>
+
+    </div>
+
+    <!-- Indicaciones / Notas -->
+    <div class="receta-indicaciones" *ngIf="receta.indicaciones">
+      <strong>{{ getLabelIndicaciones() }}:</strong> {{ receta.indicaciones }}
+    </div>
+  </div>
+</div>
+      </div>
+
+      <!-- Plan de Tratamiento -->
+<div class="detalle-section" 
+     *ngIf="consultaSeleccionada?.plan_tratamiento && 
+            consultaSeleccionada?.plan_tratamiento.trim() !== '' && 
+            !consultaSeleccionada?.plan_tratamiento.toLowerCase().includes('abstract')">
+  <h3>📋 Plan de Tratamiento</h3>
+  <p>{{ consultaSeleccionada?.plan_tratamiento }}</p>
+</div>
+
+      <!-- Observaciones -->
+<div class="detalle-section" 
+     *ngIf="consultaSeleccionada?.observaciones && 
+            consultaSeleccionada?.observaciones.trim() !== '' && 
+            !consultaSeleccionada?.observaciones.toLowerCase().includes('abstract')">
+  <h3>📄 Observaciones del Médico</h3>
+  <p>{{ consultaSeleccionada?.observaciones }}</p>
+</div>
+
+      <!-- Fecha de Seguimiento -->
+      <div class="detalle-section seguimiento" *ngIf="consultaSeleccionada?.fecha_seguimiento">
+        <h3>📅 Próxima Consulta</h3>
+        <p class="fecha-seguimiento">{{ consultaSeleccionada.fecha_seguimiento | date:'dd/MM/yyyy' }}</p>
+      </div>
+
     </div>
   </div>
 </div>

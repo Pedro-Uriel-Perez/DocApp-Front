@@ -23,6 +23,7 @@ export class CitasMedicoComponent implements OnInit {
 
   // --- NUEVO: Bandera de Especialidad ---
   esNutriologo: boolean = false;
+  especialidadMedico: string = '';
 
   // Modal completar con historial médico
   mostrarModalCompletar = false;
@@ -76,7 +77,8 @@ export class CitasMedicoComponent implements OnInit {
       // Para la DEMO, si no tienes el dato, puedes forzarlo temporalmente así:
       // this.esNutriologo = false; // <--- DESCOMENTAR SOLO PARA PROBAR VISUALMENTE SI NO TIENES EL DATO
 
-      const especialidad = user.especialidad || ''; // Asegúrate que tu login devuelva esto
+      const especialidad = user.especialidad || '';
+      this.especialidadMedico = especialidad;
       this.esNutriologo = especialidad.toLowerCase().includes('nutrición');
 
       this.cargarCitas();
@@ -87,29 +89,142 @@ export class CitasMedicoComponent implements OnInit {
 
 
    // --- GETTERS DINÁMICOS (La Magia del Frontend) ---
+
+  // Detectores de especialidad
+  esNutricion(): boolean {
+    return this.especialidadMedico?.toLowerCase().includes('nutrición') ||
+           this.especialidadMedico?.toLowerCase().includes('nutricion') ||
+           this.especialidadMedico?.toLowerCase().includes('nutriólogo');
+  }
+
+  esPediatria(): boolean {
+    return this.especialidadMedico?.toLowerCase().includes('pediatría') ||
+           this.especialidadMedico?.toLowerCase().includes('pediatria') ||
+           this.especialidadMedico?.toLowerCase().includes('pediatra');
+  }
+
+  esPsiquiatria(): boolean {
+    return this.especialidadMedico?.toLowerCase().includes('psiquiatría') ||
+           this.especialidadMedico?.toLowerCase().includes('psiquiatria') ||
+           this.especialidadMedico?.toLowerCase().includes('psiquiatra');
+  }
+
+  esOdontologia(): boolean {
+    return this.especialidadMedico?.toLowerCase().includes('odontología') ||
+           this.especialidadMedico?.toLowerCase().includes('odontologia') ||
+           this.especialidadMedico?.toLowerCase().includes('dental');
+  }
+
+  esDermatologia(): boolean {
+    return this.especialidadMedico?.toLowerCase().includes('dermatología') ||
+           this.especialidadMedico?.toLowerCase().includes('dermatologia');
+  }
+
+  esCardiologia(): boolean {
+    return this.especialidadMedico?.toLowerCase().includes('cardiología') ||
+           this.especialidadMedico?.toLowerCase().includes('cardiologia') ||
+           this.especialidadMedico?.toLowerCase().includes('cardiólogo');
+  }
+
+  esTraumatologia(): boolean {
+    return this.especialidadMedico?.toLowerCase().includes('traumatología') ||
+           this.especialidadMedico?.toLowerCase().includes('traumatologia') ||
+           this.especialidadMedico?.toLowerCase().includes('ortopedia');
+  }
+
   get tituloSeccionItems(): string {
-    return this.esNutriologo ? '🥗 Plan Alimenticio' : '💊 Recetas Médicas';
+    if (this.esNutricion()) return '🥗 Plan Alimenticio';
+    if (this.esPediatria()) return '👶 Medicamentos Pediátricos';
+    if (this.esPsiquiatria()) return '💊 Tratamiento Psiquiátrico';
+    if (this.esOdontologia()) return '🦷 Tratamiento Dental';
+    if (this.esDermatologia()) return '🧴 Tratamiento Dermatológico';
+    if (this.esCardiologia()) return '❤️ Tratamiento Cardiovascular';
+    if (this.esTraumatologia()) return '🦴 Tratamiento Traumatológico';
+    return '💊 Recetas Médicas';
   }
+
   get lblAgregarBtn(): string {
-    return this.esNutriologo ? 'Agregar Alimento' : 'Agregar Medicamento';
+    if (this.esNutricion()) return 'Agregar Alimento';
+    if (this.esPediatria()) return 'Agregar Medicamento Pediátrico';
+    if (this.esOdontologia()) return 'Agregar Tratamiento';
+    if (this.esDermatologia()) return 'Agregar Producto';
+    return 'Agregar Medicamento';
   }
+
   get lblNombreItem(): string {
-    return this.esNutriologo ? 'Alimento / Platillo' : 'Medicamento';
+    if (this.esNutricion()) return 'Alimento / Platillo';
+    if (this.esPediatria()) return 'Medicamento Pediátrico';
+    if (this.esOdontologia()) return 'Tratamiento / Procedimiento';
+    if (this.esDermatologia()) return 'Producto / Medicamento';
+    if (this.esPsiquiatria()) return 'Medicamento Psiquiátrico';
+    return 'Medicamento';
   }
+
   get placeholderNombre(): string {
-    return this.esNutriologo ? 'Ej. Pechuga de Pollo' : 'Ej. Paracetamol';
+    if (this.esNutricion()) return 'Ej. Pechuga de Pollo';
+    if (this.esPediatria()) return 'Ej. Amoxicilina infantil';
+    if (this.esOdontologia()) return 'Ej. Limpieza dental';
+    if (this.esDermatologia()) return 'Ej. Crema hidratante';
+    return 'Ej. Paracetamol';
   }
+
   get lblDosis(): string {
-    return this.esNutriologo ? 'Porción' : 'Dosis';
+    if (this.esNutricion()) return 'Porción';
+    if (this.esPediatria()) return 'Dosis Pediátrica';
+    if (this.esOdontologia()) return 'Aplicación';
+    if (this.esDermatologia()) return 'Cantidad';
+    return 'Dosis';
   }
+
   get placeholderDosis(): string {
-    return this.esNutriologo ? 'Ej. 150g / 1 taza' : 'Ej. 500mg';
+    if (this.esNutricion()) return 'Ej. 150g / 1 taza';
+    if (this.esPediatria()) return 'Ej. 5ml / según peso';
+    if (this.esOdontologia()) return 'Ej. 1 aplicación';
+    if (this.esDermatologia()) return 'Ej. Capa fina';
+    return 'Ej. 500mg';
   }
+
   get lblFrecuencia(): string {
-    return this.esNutriologo ? 'Horario' : 'Frecuencia';
+    if (this.esNutricion()) return 'Horario';
+    if (this.esPsiquiatria()) return 'Toma';
+    if (this.esOdontologia()) return 'Frecuencia de Aplicación';
+    return 'Frecuencia';
   }
+
   get placeholderFrecuencia(): string {
-    return this.esNutriologo ? 'Ej. Desayuno' : 'Ej. Cada 8 horas';
+    if (this.esNutricion()) return 'Ej. Desayuno';
+    if (this.esPediatria()) return 'Ej. Cada 8 horas';
+    if (this.esOdontologia()) return 'Ej. 2 veces al día';
+    return 'Ej. Cada 8 horas';
+  }
+
+  get lblDuracion(): string {
+    if (this.esNutricion()) return 'Preparación';
+    if (this.esOdontologia()) return 'Periodo de Tratamiento';
+    return 'Duración';
+  }
+
+  get placeholderDuracion(): string {
+    if (this.esNutricion()) return 'Ej. Al vapor / Asado';
+    if (this.esPediatria()) return 'Ej. 7 días';
+    if (this.esOdontologia()) return 'Ej. 2 semanas';
+    return 'Ej. 5 días / 1 semana';
+  }
+
+  get lblIndicaciones(): string {
+    if (this.esNutricion()) return 'Notas / Preparación';
+    if (this.esPsiquiatria()) return 'Observaciones';
+    if (this.esOdontologia()) return 'Instrucciones';
+    if (this.esPediatria()) return 'Indicaciones para padres';
+    return 'Indicaciones';
+  }
+
+  get mostrarGenerico(): boolean {
+    return !this.esNutricion();
+  }
+
+  get mostrarViaAdministracion(): boolean {
+    return !this.esNutricion() && !this.esOdontologia();
   }
   // ------------------------------------------------
 

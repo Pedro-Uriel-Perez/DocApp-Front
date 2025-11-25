@@ -357,10 +357,11 @@ h1 {
 
 .detalle-section {
   background: #f8f9fa;
-  padding: 1.5rem;
-  border-radius: 10px;
-  margin-bottom: 1.5rem;
-  border-left: 4px solid #1976d2;
+  padding: 1.75rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  border-left: 5px solid #1976d2;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .detalle-section h3 {
@@ -433,6 +434,7 @@ h1 {
 .recetas-section {
   background: #fff3e0;
   border-left-color: #ff9800;
+  padding-bottom: 2rem;
 }
 
 .recetas-header {
@@ -463,20 +465,22 @@ h1 {
 
 .recetas-detalle {
   display: grid;
-  gap: 1rem;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
 }
 
 .receta-card {
   background: white;
-  padding: 1.5rem;
-  border-radius: 10px;
-  border-left: 4px solid #28a745;
+  padding: 1.75rem;
+  border-radius: 12px;
+  border-left: 5px solid #28a745;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 .receta-nombre {
-  margin-bottom: 1rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 2px solid #f0f0f0;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e9ecef;
 }
 
 .receta-nombre strong {
@@ -494,9 +498,9 @@ h1 {
 
 .receta-detalles {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 0.75rem;
-  margin-bottom: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
 }
 
 .receta-info-item {
@@ -507,26 +511,51 @@ h1 {
 .receta-info-item .label {
   color: #6c757d;
   font-size: 0.85rem;
-  font-weight: 500;
-  margin-bottom: 0.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .receta-info-item .value {
   color: #2c3e50;
   font-weight: 600;
+  font-size: 1.05rem;
+  line-height: 1.4;
 }
 
 .receta-indicaciones {
   background: #f8f9fa;
-  padding: 1rem;
-  border-radius: 6px;
+  padding: 1.25rem;
+  border-radius: 8px;
   font-size: 0.95rem;
   color: #495057;
-  line-height: 1.6;
+  line-height: 1.8;
+  border-left: 3px solid #6c757d;
 }
 
 .receta-indicaciones strong {
   color: #2c3e50;
+}
+
+/* ==========================================
+   SECCIONES DE INFORMACIÓN ADICIONAL
+   ========================================== */
+
+/* Separación extra después de recetas */
+.recetas-section {
+  margin-bottom: 3rem;
+  position: relative;
+}
+
+.recetas-section::after {
+  content: '';
+  position: absolute;
+  bottom: -1.5rem;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, #dee2e6 20%, #dee2e6 80%, transparent 100%);
 }
 
 /* ==========================================
